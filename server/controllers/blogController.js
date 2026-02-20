@@ -55,7 +55,8 @@ exports.createBlog=async(req,res)=>{
 
 exports.getAllBlogs=async(req,res)=>{
     try {
-        const blogs=await Blog.find().populate("author","name email");
+        const blogs=await Blog.find().populate("author","name email").sort({ createdAt: -1 });;
+        
         return res.status(200).json({
             success:true,
             message:"Blogs fetched successfully",

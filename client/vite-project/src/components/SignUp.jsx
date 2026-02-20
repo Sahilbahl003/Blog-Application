@@ -10,6 +10,7 @@ const SignUp = () => {
 
   const [step, setStep] = useState(1);
   const [timer, setTimer] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -54,6 +55,7 @@ const SignUp = () => {
     }
 
     setFormError("");
+    setLoading(true);
 
     try {
       const response = await fetch("http://localhost:4000/api/v1/register-otp", {
@@ -66,6 +68,7 @@ const SignUp = () => {
 
       if (!response.ok) {
         setFormError(data.msg || "Failed to send OTP");
+        setLoading(false);
         return;
       }
 
@@ -74,6 +77,8 @@ const SignUp = () => {
       setTimer(900);
     } catch {
       setFormError("Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -117,7 +122,7 @@ const SignUp = () => {
           <>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Name</label>
-              <input name="name" value={formData.name} onChange={changeHandler} onBlur={blurHandler} placeholder="Enter your name" className="shadow-sm shadow-zinc-300 px-4 py-2 rounded-md outline-none focus:ring-2 focus:ring-blue-400" />
+              <input name="name" value={formData.name} onChange={changeHandler} onBlur={blurHandler} placeholder="Enter your name" className="shadow-sm shadow-zinc-300 px-4 py-2 rounded-md outline-none focus:ring-2 focus:ring-blue-400" maxLength={30} />
               {errors.name && <p className="text-red-600 text-xs">{errors.name}</p>}
             </div>
 
@@ -140,7 +145,7 @@ const SignUp = () => {
               </label>
 
               <div className="relative">
-                <input name="password" type={showPassword ? "text" : "password"} placeholder="Enter password" value={formData.password} onChange={changeHandler} onBlur={blurHandler} className="shadow-sm shadow-zinc-300 px-4 py-2 pr-10 rounded-md w-full outline-none focus:ring-2 focus:ring-blue-400" />
+                <input name="password" type={showPassword ? "text" : "password"} placeholder="Enter password" value={formData.password} onChange={changeHandler} onBlur={blurHandler} className="shadow-sm shadow-zinc-300 px-4 py-2 pr-10 rounded-md w-full outline-none focus:ring-2 focus:ring-blue-400" maxLength={20}/>
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer" onClick={() => setShowPassword(!showPassword)}>
                   {showPassword ? <AiOutlineEyeInvisible className="text-gray-500 text-lg" /> : <AiOutlineEye className="text-gray-500 text-lg" />}
                 </div>
@@ -151,7 +156,7 @@ const SignUp = () => {
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Confirm Password</label>
               <div className="relative">
-                <input name="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Confirm password" value={formData.confirmPassword} onChange={changeHandler} onBlur={blurHandler} className="shadow-sm shadow-zinc-300 px-4 py-2 pr-10 rounded-md w-full outline-none focus:ring-2 focus:ring-blue-400" />
+                <input name="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Confirm password" value={formData.confirmPassword} onChange={changeHandler} onBlur={blurHandler} className="shadow-sm shadow-zinc-300 px-4 py-2 pr-10 rounded-md w-full outline-none focus:ring-2 focus:ring-blue-400" maxLength={20} />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
                   {showConfirmPassword ? <AiOutlineEyeInvisible className="text-gray-500 text-lg" /> : <AiOutlineEye className="text-gray-500 text-lg" />}
                 </div>
@@ -161,8 +166,16 @@ const SignUp = () => {
 
             {formError && <p className="text-red-600 text-sm text-center">{formError}</p>}
 
-            <button className="bg-blue-500 hover:bg-blue-600 text-white rounded-md h-10 mt-2 transition">
-              Register
+            <button
+              disabled={loading}
+              className="bg-blue-500 hover:bg-blue-600 text-white rounded-md h-10 mt-2 transition cursor-pointer flex justify-center items-center"
+            >
+              {loading ? (
+                <div className="flex gap-1 items-center justify-center"><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-white">loading...</p></div>
+              ) : (
+                "Register"
+              )}
             </button>
           </>
         )}

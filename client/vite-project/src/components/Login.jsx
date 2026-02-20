@@ -125,12 +125,17 @@ const Login = () => {
             )}
           </div>
 
+          <p className="text-blue-500 cursor-pointer pl-57 text-sm"
+          onClick={() => navigate("/forgot-password")}>
+          Forgot Password?
+          </p>
+
 
         {formError && (
           <p className="text-red-600 text-sm text-center">{formError}</p>
         )}
 
-        <button className="bg-blue-500 hover:bg-blue-600 text-white rounded-md h-10 mt-2 transition">
+        <button className="bg-blue-500 hover:bg-blue-600 text-white rounded-md h-10 mt-2 transition cursor-pointer">
           Login
         </button>
 
@@ -144,10 +149,10 @@ const Login = () => {
           </span>
         </p>
 
-        <p className="text-blue-500 cursor-pointer"
+        {/* <p className="text-blue-500 cursor-pointer"
         onClick={() => navigate("/forgot-password")}>
         Forgot Password?
-      </p>
+        </p> */}
 
       </form>
     </div>

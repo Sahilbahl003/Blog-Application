@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { RxCross1 } from "react-icons/rx";
-import { validateField } from "../utils/validation";
 import LogoutModal from "./logoutModal";
-
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -13,9 +11,9 @@ const Profile = () => {
   const [user, setUser] = useState(null);
   const [name, setName] = useState("");
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-
   const [errors, setErrors] = useState({});
 
   const profilePlaceholder = "https://placehold.co/200x200?text=Profile";
@@ -34,34 +32,68 @@ const Profile = () => {
   }, []);
 
   const updateProfile = async () => {
+    if (errors.image || loading) return;
+
+    setLoading(true);
+
     const form = new FormData();
     form.append("name", name);
     if (image) form.append("image", image);
 
-    const res = await fetch("http://localhost:4000/api/v1/updateProfile", {
-      method: "PUT",
-      headers: { token },
-      body: form,
-    });
+    try {
+      const res = await fetch("http://localhost:4000/api/v1/updateProfile", {
+        method: "PUT",
+        headers: { token },
+        body: form,
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) return toast.error(data.message);
+      if (!res.ok) {
+        setLoading(false);
+        return toast.error(data.message);
+      }
 
-    toast.success("Profile updated");
-    setUser(data.user);
-    localStorage.setItem("user", JSON.stringify(data.user));
+      toast.success("Profile updated");
+      setUser(data.user);
+      localStorage.setItem("user", JSON.stringify(data.user));
+    } catch (error) {
+      toast.error("Something went wrong");
+    }
+
+    setLoading(false);
   };
 
   const confirmLogout = () => {
-  localStorage.clear();
-  toast.success("Logged out successfully");
+    localStorage.clear();
+    toast.success("Logged out successfully");
+    setTimeout(() => {
+      navigate("/login");
+    }, 1000);
+  };
 
-  setTimeout(() => {
-    navigate("/login");
-  }, 1000);
-};
+  const handleImageChange = (file) => {
+    if (!file) return;
 
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+
+    if (!allowedTypes.includes(file.type)) {
+      setErrors((prev) => ({
+        ...prev,
+        image: "Only JPG, JPEG and PNG formats are allowed",
+      }));
+      setImage(null);
+      return;
+    }
+
+    setErrors((prev) => ({ ...prev, image: "" }));
+    setImage(file);
+  };
+
+  const handleRemoveImage = () => {
+    setImage(null);
+    setErrors((prev) => ({ ...prev, image: "" }));
+  };
 
   return (
     <div className="w-screen min-h-screen flex justify-center items-center bg-gray-50">
@@ -70,7 +102,7 @@ const Profile = () => {
           Your Profile
         </h2>
 
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-3">
           <img
             src={
               image
@@ -81,17 +113,31 @@ const Profile = () => {
             onClick={() => setShowPreview(true)}
           />
 
-          <input
-            type="file"
-            accept="image/*"
-            className="text-sm border p-2"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              setImage(file);
-              const error = validateField("image", file);
-              setErrors((prev) => ({ ...prev, image: error }));
-            }}
-          />
+          <div className="flex gap-3">
+            <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition text-sm">
+              Upload Profile
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  handleImageChange(file);
+                }}
+              />
+            </label>
+
+            {image && (
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition text-sm"
+              >
+                Remove Profile
+              </button>
+            )}
+          </div>
+
           {errors.image && (
             <p className="text-red-600 text-xs">{errors.image}</p>
           )}
@@ -108,9 +154,15 @@ const Profile = () => {
 
         <button
           onClick={updateProfile}
-          className="bg-blue-500 hover:bg-blue-600 text-white rounded-md h-10 transition"
+          disabled={loading}
+          className={`${
+            loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+          } text-white rounded-md h-10 transition flex justify-center items-center gap-2`}
         >
-          Save Changes
+          {loading && (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          )}
+          {loading ? "Saving..." : "Save Changes"}
         </button>
 
         <button

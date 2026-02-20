@@ -27,11 +27,14 @@ exports.register = async (req, res) => {
       });
     }
 
+    // const lowerCaseEmail=email.toLowerCase();
+    // console.log(lowerCaseEmail);
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       name,
-      email,
+      email:email,
       password: hashedPassword,
       role: "user",
     });

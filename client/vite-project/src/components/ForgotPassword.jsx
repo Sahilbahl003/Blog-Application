@@ -84,11 +84,13 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="flex flex-col items-center mt-40 gap-16 mb-60">
+    <div className="flex flex-col items-center gap-16 pt-60 pb-40 h-full bg-gray-50">
+    <div className="flex flex-col gap-11 bg-white shadow-xl px-10 py-7 rounded-md">
+    <h2 className="text-2xl font-bold text-blue-500">Forgot Password?</h2>
       {step === 1 && (
         <>
-          <input name="email" placeholder="Enter Email" onChange={handleChange} className="border p-2" />
-          <button onClick={sendOtp} className="bg-blue-500 text-white px-4 py-2">
+          <input name="email" placeholder="Enter Email" onChange={handleChange} className="border p-2 flex flex-col w-80 " />
+          <button onClick={sendOtp} className="bg-blue-500 text-white px-2 py-2 flex justify-center w-30 ml-25 rounded-md">
             Send OTP
           </button>
         </>
@@ -113,11 +115,13 @@ const ForgotPassword = () => {
         <>
           <input type="password" name="newPassword" placeholder="New Password" onChange={handleChange} className="border p-2" />
           <input type="password" name="confirmPassword" placeholder="Confirm Password" onChange={handleChange} className="border p-2" />
+          
           <button onClick={resetPassword} className="bg-purple-500 text-white px-4 py-2">
             Update Password
           </button>
         </>
       )}
+    </div>
     </div>
   );
 };

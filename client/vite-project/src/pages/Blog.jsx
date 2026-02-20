@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
 import Comments from "../components/Comments";
 import { toast } from "react-toastify";
+import { FiLink2 } from "react-icons/fi";
 
 const Blog = () => {
   const { id } = useParams();
@@ -48,6 +49,15 @@ const Blog = () => {
     navigate("/myblogs");
   };
 
+  const copyCurrentUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copied to clipboard");
+    } catch {
+      toast.error("Failed to copy link");
+    }
+  };
+
   return (
     <div className="flex justify-center w-full px-4 mt-20 mb-10">
       {loading ? (
@@ -69,7 +79,15 @@ const Blog = () => {
             </>
           )}
 
-          <h1 className="text-3xl font-bold mb-2">{blog.title}</h1>
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-3xl font-bold">{blog.title}</h1>
+            <button
+              onClick={copyCurrentUrl}
+              className="bg-blue-500 text-white px-4 py-1 rounded flex justify-center items-center gap-2 cursor-pointer"
+            >
+              Share <FiLink2 />
+            </button>
+          </div>
 
           {fromMyBlogs && (
             <div className="flex gap-3 mb-4">

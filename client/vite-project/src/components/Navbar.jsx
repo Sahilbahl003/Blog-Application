@@ -77,30 +77,23 @@ const Navbar = () => {
           Contact Us
         </div>
 
-        {!token && (
+        {/* {!token && (
           <button
             className="bg-blue-500 hover:bg-blue-600 text-white w-24 px-2 py-2 rounded-sm font-[16px] cursor-pointer"
             onClick={() => navigate("/register")}
           >
             Register
           </button>
-        )}
+        )} */}
 
-        {!token ? (
+        {!token && 
           <button
             className="bg-blue-500 hover:bg-blue-600 text-white w-20 px-2 py-2 rounded-sm font-[16px] cursor-pointer"
             onClick={() => navigate("/login")}
           >
             Login
           </button>
-        ) : (
-          <button
-            className="bg-blue-500 cursor-pointer hover:bg-blue-600 text-white w-20 px-2 py-2 rounded-sm font-[16px]"
-            onClick={() => setShowLogoutModal(true)}
-          >
-            Logout
-          </button>
-        )}
+        }
 
         {token && user && (
           <div

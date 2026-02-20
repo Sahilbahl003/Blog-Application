@@ -25,7 +25,7 @@ function App() {
             <Route path="/" element={<Home/>} />
             <Route path="/allblogs" element={<AllBlogs/>} />
             <Route path="/allblogs/:id" element={<Blog/>} />
-            <Route path="/myblogs" element={<MyBlogs/>}/>
+            <Route path="/myblogs" element={<ProtectedRoutes><MyBlogs/></ProtectedRoutes>}/>
             <Route path="/myblogs/:id" element={<Blog/>}/>
             <Route path="/write" element={<ProtectedRoutes><Write/></ProtectedRoutes>} />
             <Route path="/contact" element={<Contact/>}/>

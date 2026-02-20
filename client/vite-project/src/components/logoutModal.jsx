@@ -2,7 +2,7 @@ import React from "react";
 
 const LogoutModal = ({ onCancel, onConfirm }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-black/50 bg-opacity-40 flex justify-center items-center z-50">
       <div className="bg-white w-[350px] rounded-xl shadow-xl p-6 text-center">
 
         <h2 className="text-lg font-semibold mb-2">Logout Confirmation</h2>
@@ -12,17 +12,17 @@ const LogoutModal = ({ onCancel, onConfirm }) => {
 
         <div className="flex justify-center gap-4">
           <button
-            onClick={onConfirm}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-          >
-            Confirm
-          </button>
-
-          <button
             onClick={onCancel}
             className="border border-blue-500 text-blue-500 px-4 py-2 rounded-md hover:bg-blue-500 hover:text-white"
           >
             Cancel
+          </button>
+
+          <button
+            onClick={onConfirm}
+            className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+          >
+            Confirm
           </button>
         </div>
 
