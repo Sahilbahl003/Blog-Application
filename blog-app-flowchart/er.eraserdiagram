@@ -1,0 +1,34 @@
+entity-relationship-diagram
+
+user [icon:user,color:green]{
+    _id string
+    name string
+    email string
+    password string
+    confirmPassword string
+    profilePicture string
+    createdAt timestamp
+}
+
+blog [icon:pencil]{
+    _id string
+    title string 
+    content string
+    picture string
+    authorId string 
+    createdAt timestamp
+}
+
+comment [icon:chat, color:blue]{
+    _id string
+    userId string
+    postId string
+    text string
+    createdAt timestamp 
+
+}
+
+
+blog.authorId > user._id
+comment.userId > user._id
+comment.blogId > blog._id
