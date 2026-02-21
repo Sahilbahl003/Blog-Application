@@ -26,12 +26,25 @@ const SignUp = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const changeHandler = (e) => {
-    const { name, value } = e.target;
-    const updated = { ...formData, [name]: value };
-    setFormData(updated);
-    const error = validateField(name, value, updated);
-    setErrors((prev) => ({ ...prev, [name]: error }));
-  };
+  const { name, value } = e.target;
+  const updated = { ...formData, [name]: value };
+  setFormData(updated);
+
+  
+  const error = validateField(name, value, updated);
+
+
+  let confirmError = errors.confirmPassword;
+  if (name === "password" && updated.confirmPassword) {
+    confirmError = validateField("confirmPassword", updated.confirmPassword, updated);
+  }
+
+  setErrors((prev) => ({
+    ...prev,
+    [name]: error,
+    ...(name === "password" ? { confirmPassword: confirmError } : {}),
+  }));
+};
 
   const blurHandler = (e) => {
     const { name, value } = e.target;

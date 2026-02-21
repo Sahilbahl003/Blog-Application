@@ -55,7 +55,7 @@ exports.createBlog=async(req,res)=>{
 
 exports.getAllBlogs=async(req,res)=>{
     try {
-        const blogs=await Blog.find().populate("author","name email").sort({ createdAt: -1 });;
+        const blogs=await Blog.find().populate("author","name email profileImage").sort({ createdAt: -1 });;
         
         return res.status(200).json({
             success:true,
@@ -75,7 +75,7 @@ exports.getAllBlogs=async(req,res)=>{
 exports.getBlogById=async(req,res)=>{
     try {
         const {id} = req.params;
-        const blog=await Blog.findById(id).populate("author","name email");
+        const blog=await Blog.findById(id).populate("author","name email profileImage");
         return res.status(200).json({
                success:true,
                  message:"Blog fetched successfully",
@@ -90,21 +90,25 @@ exports.getBlogById=async(req,res)=>{
     }
 }
 
-exports.getMyBlogs=async(req,res)=>{
-    try {
-        const userId = req.user.id;
-        const blogs = await Blog.find({author:userId}).populate("author")
-        res.status(200).json({
-            success:true,
-            blogs
-        })
-    } catch (error) {
-        res.status(500).json({
-            success:false,
-            message:"Error fetching my blogs"
-        })
-    }
-}
+exports.getMyBlogs = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const blogs = await Blog.find({ author: userId })
+      .populate("author", "name profileImage") // correct populate syntax
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      blogs,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching my blogs",
+      error: error.message
+    });
+  }
+};
 
 exports.deleteBlogById = async (req, res) => {
     try {

@@ -14,7 +14,8 @@ const addComment = async (req, res) => {
       text,
     });
 
-    await comment.populate("user", "name");
+    
+    await comment.populate("user", "name profileImage");
 
     res.status(201).json({ comment });
   } catch (error) {
@@ -25,7 +26,7 @@ const addComment = async (req, res) => {
 const getComments = async (req, res) => {
   try {
     const comments = await Comment.find({ blog: req.params.blogId })
-      .populate("user", "name")
+      .populate("user", "name profileImage") 
       .sort({ createdAt: -1 });
 
     res.status(200).json({ comments });

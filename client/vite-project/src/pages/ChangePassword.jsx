@@ -25,10 +25,20 @@ const ChangePassword = () => {
     const { name, value } = e.target;
     const updated = { ...formData, [name]: value };
     setFormData(updated);
-    const error = validateField(name, value, updated);
-    setErrors((prev) => ({ ...prev, [name]: error }));
-  };
 
+    const error = validateField(name, value, updated);
+
+    let confirmError = errors.confirmPassword1;
+    if (name === "newPassword" && updated.confirmPassword1) {
+      confirmError = validateField("confirmPassword1", updated.confirmPassword1, updated);
+    }
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: error,
+      ...(name === "newPassword" ? { confirmPassword1: confirmError } : {}),
+    }));
+  };
 
   const blurHandler = (e) => {
     const { name, value } = e.target;

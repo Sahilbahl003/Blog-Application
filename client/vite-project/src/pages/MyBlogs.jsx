@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import ClipLoader from 'react-spinners/ClipLoader';
 
-const truncateText = (text, maxLength = 150) => {
+const truncateTextContent = (text, maxLength = 20) => {
   if (!text) return "";
   return text.length > maxLength
     ? text.slice(0, maxLength) + "..."
@@ -29,8 +29,7 @@ const MyBlogs = () => {
       );
 
       const data = await response.json();
-      if (data.success) 
-          setBlogs(data.blogs);
+      if (data.success) setBlogs(data.blogs);
 
       setLoading(false);
     } catch (error) {
@@ -54,28 +53,55 @@ const MyBlogs = () => {
           </p>
         </div>
       ) : (
-        <div className='grid grid-cols-3 gap-10 mt-4 w-[80vw]'>
-          {blogs.map((blog) => ( <div key={blog._id} onClick={() =>navigate(`/myblogs/${blog._id}`, {state: { fromMyBlogs: true } })}
-              className='shadow-md shadow-zinc-400 p-5 w-[400px] hover:scale-105 hover:shadow-lg hover:shadow-zinc-800 transition-all duration-300 cursor-pointer'>
-              <img src={blog.image} alt={blog.title}
-               className='w-full h-[200px] object-cover mb-4 rounded-md'
+        <div className='grid grid-cols-3 gap-10 mt-4 w-[80vw] flex-wrap justify-start'>
+          {blogs.map((blog) => (
+            <div 
+              key={blog._id} 
+              onClick={() => navigate(`/myblogs/${blog._id}`, { state: { fromMyBlogs: true } })}
+              className='shadow-md shadow-zinc-400 p-5 w-[400px] hover:scale-105 hover:shadow-lg hover:shadow-zinc-800 transition-all duration-300 cursor-pointer'
+            >
+              {blog.image && (
+                <img 
+                  src={blog.image} 
+                  alt={blog.title} 
+                  className='w-full h-[200px] object-cover mb-4 rounded-md'
+                />
+              )}
+
+              <h2 className='text-2xl pb-4 break-words [overflow-wrap:anywhere]'>
+                {truncateTextContent(blog.title)}
+              </h2>
+
+              {/* Render HTML content without stripping tags */}
+              <div
+                className="prose max-w-none text-zinc-700 overflow-hidden"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 5, // show up to 5 lines
+                  WebkitBoxOrient: "vertical",
+                }}
+                dangerouslySetInnerHTML={{ __html: blog.content }}
               />
 
-              <h2 className='text-2xl pb-4'>{blog.title}</h2>
-
-              <p className="text-zinc-700">
-                {truncateText(blog.content)}
-              </p>
-
-              <button className="text-blue-600 font-semibold mt-2" onClick={() =>navigate(`/myblogs/${blog._id}`, {state: { fromMyBlogs: true } })}>
+              <button 
+                className='text-blue-600 font-semibold mt-2' 
+                onClick={() => navigate(`/myblogs/${blog._id}`, { state: { fromMyBlogs: true } })}
+              >
                 Read More →
               </button>
 
-              <p className='text-lg italic mt-2 text-zinc-600'>
-                By - {blog.author?.name}
-              </p>
+              <div className='flex items-center gap-3 mt-3'>
+                <img 
+                  src={blog.author?.profileImage || "https://i.ibb.co/4pDNDk1/avatar.png"} 
+                  alt={blog.author?.name || "Author"} 
+                  className='w-10 h-10 rounded-full object-cover shadow-sm'
+                />
+                <p className='text-lg italic text-zinc-600'>
+                  By - {blog.author?.name || "Unknown"}
+                </p>
+              </div>
 
-              <p className='text-sm'>
+              <p className='text-sm mt-1'>
                 {new Date(blog.createdAt).toLocaleDateString('en-GB')}
               </p>
             </div>

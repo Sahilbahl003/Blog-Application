@@ -1,33 +1,81 @@
-import { toast } from 'react-toastify';
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { toast } from "react-toastify";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { RxCross1 } from "react-icons/rx";
+import { useQuill } from "react-quilljs";
+import "quill/dist/quill.snow.css";
+
+const Editor = ({ value, onChange }) => {
+  const { quill, quillRef } = useQuill({
+    theme: "snow",
+    placeholder: "Write your content here...",
+    modules: {
+      toolbar: [
+        [{ header: [1, 2, false] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["link", "image"],
+        ["clean"],
+      ],
+    },
+  });
+
+  useEffect(() => {
+    if (quill) {
+      quill.on("text-change", () => {
+        onChange(quill.root.innerHTML);
+      });
+    }
+  }, [quill]);
+
+  return <div ref={quillRef} className="h-60 border rounded-md overflow-hidden" />;
+};
 
 const Write = () => {
   const [formData, setFormData] = useState({ title: "", content: "" });
   const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [showPreview, setShowPreview] = useState(false);
 
-  const placeholder = "https://placehold.co/400x250?text=Preview+Image";
+  const navigate = useNavigate();
 
-  let navigate = useNavigate();
-
-  function changeHandler(e) {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  }
-
+  // Check login
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) navigate("/login");
   }, []);
 
-  async function submitHandler(e) {
+  const changeHandler = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleImageChange = (file) => {
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+    if (!allowedTypes.includes(file.type)) {
+      setErrors({ image: "Only JPG, JPEG, and PNG are allowed" });
+      setImage(null);
+      return;
+    }
+
+    setErrors({ ...errors, image: "" });
+    setImage(file);
+  };
+
+  const handleRemoveImage = () => {
+    setImage(null);
+    setErrors({ ...errors, image: "" });
+  };
+
+  const submitHandler = async (e) => {
     e.preventDefault();
 
     if (!formData.title || !formData.content) {
-      toast("Title and content are required");
+      toast.error("Title and content are required");
       return;
     }
 
@@ -38,77 +86,120 @@ const Write = () => {
       data.append("content", formData.content);
       if (image) data.append("image", image);
 
-      const response = await fetch('http://localhost:4000/api/v1/createBlog', {
+      const response = await fetch("http://localhost:4000/api/v1/createBlog", {
         method: "POST",
         headers: { token },
-        body: data
+        body: data,
       });
 
       const result = await response.json();
       toast(result.message);
       navigate("/allblogs");
     } catch (error) {
-      toast("Error creating blog");
+      toast.error("Error creating blog");
       console.log(error);
     }
-  }
+  };
 
   return (
-    <div className='flex justify-center items-center'>
+    <div className="w-screen min-h-screen flex justify-center items-center bg-gray-50">
       <form
         onSubmit={submitHandler}
-        className='flex flex-col gap-5 justify-center items-center mt-30 w-[650px] h-[500px] p-10 shadow-lg shadow-zinc-400 rounded-lg mb-10'
+        className="bg-white shadow-xl p-8 w-[650px] rounded-xl flex flex-col gap-6 mt-20 mb-20"
       >
-        <label className='w-full px-10'>
-          Title:
+        <h2 className="text-2xl font-bold text-center text-blue-500">
+          Write a Blog
+        </h2>
+
+        {/* Cover Image */}
+        <div className="flex flex-col items-center gap-3">
+          {image && (
+            <img
+              src={URL.createObjectURL(image)}
+              alt="Uploaded"
+              className="w-80 h-52 object-cover rounded-md shadow-md cursor-pointer"
+              onClick={() => setShowPreview(true)}
+            />
+          )}
+
+          <div className="flex gap-3">
+            <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition text-sm">
+              Add Cover Image
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png"
+                className="hidden"
+                onChange={(e) => handleImageChange(e.target.files[0])}
+              />
+            </label>
+
+            {image && (
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition text-sm"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+
+          {errors.image && (
+            <p className="text-red-600 text-xs">{errors.image}</p>
+          )}
+        </div>
+
+        {/* Title Input */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium">Title</label>
           <input
-            className='w-full bg-zinc-200 py-2 rounded-sm'
             type="text"
             name="title"
             value={formData.title}
             onChange={changeHandler}
+            className="shadow-sm px-4 py-2 rounded-md outline-none focus:ring-2 focus:ring-blue-400"
+            maxLength={100}
           />
-        </label>
+        </div>
 
-        <label className='w-full px-10'>
-          Content:
-          <textarea
-            className='w-full bg-zinc-200 py-4'
-            name="content"
+        {/* Content Editor */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium">Content</label>
+          <Editor
             value={formData.content}
-            onChange={changeHandler}
+            onChange={(content) =>
+              setFormData((prev) => ({ ...prev, content }))
+            }
           />
-        </label>
-
-        <label className='w-full px-10'>
-          Image:
-          <input
-            className='shadow-md shadow-zinc-400 px-2 py-2 rounded-sm'
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (file) {
-                setImage(file);
-                setPreview(URL.createObjectURL(file));
-              }
-            }}
-          />
-        </label>
-
-        <img
-          src={preview || placeholder}
-          alt="Preview"
-          className='w-40 h-40 object-cover rounded-md shadow-md'
-        />
+        </div>
 
         <button
-          type='submit'
-          className='bg-blue-500 px-3 py-2 rounded-sm hover:bg-blue-700 hover:text-white'
+          type="submit"
+          className="bg-blue-500 hover:bg-blue-600 text-white rounded-md h-10 transition"
         >
-          Submit
+          Submit Blog
         </button>
       </form>
+
+      {/* Image Preview Modal */}
+      {showPreview && image && (
+        <div
+          className="fixed inset-0 bg-zinc-500 bg-opacity-70 flex justify-center items-center z-50"
+          onClick={() => setShowPreview(false)}
+        >
+          <img
+            src={URL.createObjectURL(image)}
+            alt="Preview"
+            className="max-w-[90vw] max-h-[90vh] rounded-lg object-contain"
+          />
+          <div
+            className="absolute top-5 right-5 text-white cursor-pointer"
+            onClick={() => setShowPreview(false)}
+          >
+            <RxCross1 className="w-6 h-6" />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -21,9 +21,7 @@ const Profile = () => {
   useEffect(() => {
     if (!token) return navigate("/login");
 
-    fetch("http://localhost:4000/api/v1/profile", {
-      headers: { token },
-    })
+    fetch("http://localhost:4000/api/v1/profile", { headers: { token } })
       .then((res) => res.json())
       .then((data) => {
         setUser(data.user);
@@ -33,7 +31,6 @@ const Profile = () => {
 
   const updateProfile = async () => {
     if (errors.image || loading) return;
-
     setLoading(true);
 
     const form = new FormData();
@@ -46,7 +43,6 @@ const Profile = () => {
         headers: { token },
         body: form,
       });
-
       const data = await res.json();
 
       if (!res.ok) {
@@ -74,14 +70,10 @@ const Profile = () => {
 
   const handleImageChange = (file) => {
     if (!file) return;
-
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
 
     if (!allowedTypes.includes(file.type)) {
-      setErrors((prev) => ({
-        ...prev,
-        image: "Only JPG, JPEG and PNG formats are allowed",
-      }));
+      setErrors((prev) => ({ ...prev, image: "Only JPG, JPEG and PNG formats are allowed" }));
       setImage(null);
       return;
     }
@@ -98,17 +90,11 @@ const Profile = () => {
   return (
     <div className="w-screen min-h-screen flex justify-center items-center bg-gray-50">
       <div className="bg-white shadow-xl px-8 py-6 w-[420px] rounded-xl flex flex-col gap-5">
-        <h2 className="text-2xl font-bold text-center text-blue-500">
-          Your Profile
-        </h2>
+        <h2 className="text-2xl font-bold text-center text-blue-500">Your Profile</h2>
 
         <div className="flex flex-col items-center gap-3">
           <img
-            src={
-              image
-                ? URL.createObjectURL(image)
-                : user?.profileImage || profilePlaceholder
-            }
+            src={image ? URL.createObjectURL(image) : user?.profileImage || profilePlaceholder}
             className="w-24 h-24 rounded-full object-cover shadow-md cursor-pointer hover:scale-105 transition"
             onClick={() => setShowPreview(true)}
           />
@@ -120,10 +106,7 @@ const Profile = () => {
                 type="file"
                 accept=".jpg,.jpeg,.png"
                 className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  handleImageChange(file);
-                }}
+                onChange={(e) => handleImageChange(e.target.files[0])}
               />
             </label>
 
@@ -133,18 +116,15 @@ const Profile = () => {
                 onClick={handleRemoveImage}
                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition text-sm"
               >
-                Remove Profile
+                Remove
               </button>
             )}
           </div>
 
-          {errors.image && (
-            <p className="text-red-600 text-xs">{errors.image}</p>
-          )}
+          {errors.image && <p className="text-red-600 text-xs">{errors.image}</p>}
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium">Name</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -182,19 +162,16 @@ const Profile = () => {
 
       {showPreview && (
         <div
-          className="fixed inset-0 bg-zinc-500 bg-opacity-70 flex justify-center items-center"
+          className="fixed inset-0 bg-zinc-500 bg-opacity-70 flex justify-center items-center z-50"
           onClick={() => setShowPreview(false)}
         >
           <img
-            src={
-              image
-                ? URL.createObjectURL(image)
-                : user?.profileImage || profilePlaceholder
-            }
-            className="w-80 h-80 rounded-lg object-cover"
+            src={image ? URL.createObjectURL(image) : user?.profileImage || profilePlaceholder}
+            alt="Preview"
+            className="max-w-[90vw] max-h-[90vh] rounded-lg object-contain"
           />
           <div
-            className="text-zinc-200 pb-90 cursor-pointer"
+            className="absolute top-5 right-5 text-white cursor-pointer"
             onClick={() => setShowPreview(false)}
           >
             <RxCross1 className="w-6 h-6" />
@@ -203,10 +180,7 @@ const Profile = () => {
       )}
 
       {showLogoutModal && (
-        <LogoutModal
-          onCancel={() => setShowLogoutModal(false)}
-          onConfirm={confirmLogout}
-        />
+        <LogoutModal onCancel={() => setShowLogoutModal(false)} onConfirm={confirmLogout} />
       )}
     </div>
   );
