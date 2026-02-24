@@ -1,6 +1,6 @@
 import {BrowserRouter,Routes,Route,} from "react-router-dom";
 import Home from './pages/Home';
-import SignUp from './components/signUp';
+import SignUp from './components/SignUp';
 import Contact from './pages/Contact';
 import Navbar from './components/Navbar';
 import { ToastContainer} from 'react-toastify';
@@ -26,15 +26,15 @@ function App() {
             <Route path="/allblogs" element={<AllBlogs/>} />
             <Route path="/allblogs/:id" element={<Blog/>} />
             <Route path="/myblogs" element={<ProtectedRoutes><MyBlogs/></ProtectedRoutes>}/>
-            <Route path="/myblogs/:id" element={<Blog/>}/>
+            <Route path="/myblogs/:id" element={<ProtectedRoutes><Blog/></ProtectedRoutes>}/>
             <Route path="/write" element={<ProtectedRoutes><Write/></ProtectedRoutes>} />
             <Route path="/contact" element={<Contact/>}/>
             <Route path="/register" element={<SignUp/>}/>
             <Route path="/login" element={<Login/>}/>
             <Route path="/profile" element={<Profile/>}/>
-            <Route path="/editblog/:id" element={<EditBlog/>} />
+            <Route path="/editblog/:id" element={<ProtectedRoutes><EditBlog/></ProtectedRoutes>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/change-password" element={<ChangePassword />} />
+            <Route path="/change-password" element={<ProtectedRoutes><ChangePassword /></ProtectedRoutes>} />
           </Routes>
         </div>
       <Footer/>

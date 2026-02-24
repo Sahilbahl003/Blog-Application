@@ -2,56 +2,61 @@ const Blog = require("../models/Blog.js");
 const cloudinary = require("../config/cloudinary.js");
 
 
-exports.createBlog=async(req,res)=>{
-    try {
-        console.log("Req body",req.body);
-        console.log("Req user",req.user);
-        console.log("Req file",req.file);
-        const {title,content} = req.body;
+exports.createBlog = async (req, res) => {
+  try {
+    console.log("Req body", req.body);
+    console.log("Req user", req.user);
+    console.log("Req file", req.file);
 
-        if(!title || !content)
-        {
-            return res.status(400).json({
-                success:false,
-                message:"All fields are required"
-            });
-        }
+    const { title, content, defaultImage } = req.body;
 
-        let imageUrl="";
-        if(req.file)
-        {
-            const result= await new Promise((resolve,reject)=>{
-                cloudinary.uploader.upload_stream({folder:"blogs"},(error,result)=>{
-                    if(error)
-                    {
-                        reject(error);
-                    }
-                    else
-                    {
-                        resolve(result);
-                    }
-                }).end(req.file.buffer);
-            });
-            imageUrl=result.secure_url;
-        }
-        
-        const blog = await Blog.create({
-            title,content,author:req.user.id,email:req.user.email,image:imageUrl
-        });
-        console.log(blog);
-        return res.status(200).json({
-            success:true,
-            message:"Blog created successfully",
-            blog
-        });
-    } catch (error) {
+    if (!title || !content) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required"
+      });
+    }
 
-        return res.status(500).json({
-            success:false,
-            message:"Error creating blog",
-            error:error.message
-    }); 
-}};
+    let imageUrl = "";
+
+    if (req.file) {
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "blogs" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        ).end(req.file.buffer);
+      });
+
+      imageUrl = result.secure_url;
+    } else {
+      imageUrl = defaultImage || "https://placehold.net/800x600.png";
+    }
+
+    const blog = await Blog.create({
+      title,
+      content,
+      author: req.user.id,
+      email: req.user.email,
+      image: imageUrl
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Blog created successfully",
+      blog
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error creating blog",
+      error: error.message
+    });
+  }
+};
 
 exports.getAllBlogs=async(req,res)=>{
     try {
@@ -142,7 +147,7 @@ exports.deleteBlogById = async (req, res) => {
 exports.updateBlogById = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content } = req.body;
+    const { title, content, removeImage } = req.body;
 
     const blog = await Blog.findById(id);
 
@@ -161,6 +166,10 @@ exports.updateBlogById = async (req, res) => {
     }
 
     let imageUrl = blog.image;
+
+    if (removeImage === "true" || removeImage === true) {
+      imageUrl = "https://placehold.net/800x600.png";
+    }
 
     if (req.file) {
       const result = await new Promise((resolve, reject) => {

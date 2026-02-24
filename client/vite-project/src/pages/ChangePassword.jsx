@@ -111,7 +111,7 @@ const ChangePassword = () => {
             <div className="absolute right-3 top-0 group cursor-pointer">
               <IoAlertCircleOutline className="text-gray-400 text-lg" />
               <div className="absolute hidden group-hover:block right-0 -top-20 w-64 bg-black text-white text-xs rounded-md p-2 shadow-lg z-10">
-                Must include uppercase, number, special character <br />
+                Must include uppercase, lowercase, number, special character <br />
                 Password must be at least 8 characters
               </div>
             </div>
@@ -163,14 +163,14 @@ const ChangePassword = () => {
 
         <button
           onClick={handleChangePassword}
-          className="bg-blue-500 hover:bg-blue-600 text-white rounded-md h-10 transition"
+          className="bg-blue-500 hover:bg-blue-600 text-white rounded-md h-10 transition cursor-pointer"
         >
           Update Password
         </button>
 
         <button
           onClick={() => navigate("/profile")}
-          className="border border-gray-400 rounded-md h-10"
+          className="border border-gray-400 rounded-md h-10 cursor-pointer"
         >
           Back
         </button>

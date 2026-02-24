@@ -1,9 +1,8 @@
 const express = require('express');
-const { register, login, getUser,  updateProfileFull, changePassword } = require('../controllers/authController');
+const { register, login, getUser,  updateProfileFull, changePassword, removeProfileImage } = require('../controllers/authController');
 const { auth } = require('../middlewares/auth');
 const router = express.Router();
 const upload=require("../config/multer.js");
-const sendMail = require("../utils/sendMail");
 const {sendOtp,verifyOtp,resetPassword,} = require("../controllers/authController");
 const {sendRegisterOtp,verifyRegisterOtp,} = require("../controllers/authController");
 
@@ -16,14 +15,11 @@ router.post("/login",login);
 
 router.get("/profile",auth,getUser);
 
-router.put(
-  "/updateProfile",
-  auth,
-  upload.single("image"),
-  updateProfileFull
-);
+router.put("/updateProfile",auth, upload.single("image"),updateProfileFull);
 
 router.put("/changePassword",auth,changePassword);
+
+router.put("/removeProfileImage", auth, removeProfileImage);
 
 
 

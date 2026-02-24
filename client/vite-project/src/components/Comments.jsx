@@ -62,7 +62,7 @@ const Comments = ({ blogId }) => {
           />
           <button
             onClick={handleAddComment}
-            className="bg-blue-500 text-white px-4 rounded"
+            className="bg-blue-500 text-white px-4 rounded cursor-pointer"
           >
             Add
           </button>
@@ -102,7 +102,7 @@ const Comments = ({ blogId }) => {
       {comments.length > 3 && (
         <button
           onClick={() => setShowAll(!showAll)}
-          className="text-blue-600 font-semibold mt-2"
+          className="text-blue-600 font-semibold mt-2 cursor-pointer"
         >
           {showAll ? "Show Less" : "Show More"}
         </button>

@@ -15,7 +15,7 @@ const sendMail = async (email, otp) => {
     await transporter.sendMail({
       from: `"Blog App" <${process.env.EMAIL}>`,
       to: email,
-      subject: "Password Reset OTP",
+      subject: "OTP",
       html: `<h2>Your OTP is: ${otp}</h2>`,
     });
 

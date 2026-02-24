@@ -72,19 +72,19 @@ const MyBlogs = () => {
                 {truncateTextContent(blog.title)}
               </h2>
 
-              {/* Render HTML content without stripping tags */}
+              
               <div
                 className="prose max-w-none text-zinc-700 overflow-hidden"
                 style={{
                   display: "-webkit-box",
-                  WebkitLineClamp: 5, // show up to 5 lines
+                  WebkitLineClamp: 5, 
                   WebkitBoxOrient: "vertical",
                 }}
                 dangerouslySetInnerHTML={{ __html: blog.content }}
               />
 
               <button 
-                className='text-blue-600 font-semibold mt-2' 
+                className='text-blue-600 font-semibold mt-2 cursor-pointer' 
                 onClick={() => navigate(`/myblogs/${blog._id}`, { state: { fromMyBlogs: true } })}
               >
                 Read More →

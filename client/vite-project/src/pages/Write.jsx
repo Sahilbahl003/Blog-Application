@@ -38,8 +38,8 @@ const Write = () => {
   const [showPreview, setShowPreview] = useState(false);
 
   const navigate = useNavigate();
+  const defaultCover = "https://placehold.net/800x600.png";
 
-  // Check login
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) navigate("/login");
@@ -84,7 +84,12 @@ const Write = () => {
       const data = new FormData();
       data.append("title", formData.title);
       data.append("content", formData.content);
-      if (image) data.append("image", image);
+
+      if (image) {
+        data.append("image", image);
+      } else {
+        data.append("defaultImage", defaultCover);
+      }
 
       const response = await fetch("http://localhost:4000/api/v1/createBlog", {
         method: "POST",
@@ -93,7 +98,13 @@ const Write = () => {
       });
 
       const result = await response.json();
-      toast(result.message);
+
+      if (!response.ok) {
+        toast.error(result.message || "Failed to create blog");
+        return;
+      }
+
+      toast.success(result.message || "Blog created");
       navigate("/allblogs");
     } catch (error) {
       toast.error("Error creating blog");
@@ -111,12 +122,10 @@ const Write = () => {
           Write a Blog
         </h2>
 
-        {/* Cover Image */}
         <div className="flex flex-col items-center gap-3">
           {image && (
             <img
               src={URL.createObjectURL(image)}
-              alt="Uploaded"
               className="w-80 h-52 object-cover rounded-md shadow-md cursor-pointer"
               onClick={() => setShowPreview(true)}
             />
@@ -137,7 +146,7 @@ const Write = () => {
               <button
                 type="button"
                 onClick={handleRemoveImage}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition text-sm"
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition text-sm cursor-pointer"
               >
                 Remove
               </button>
@@ -149,7 +158,6 @@ const Write = () => {
           )}
         </div>
 
-        {/* Title Input */}
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium">Title</label>
           <input
@@ -162,7 +170,6 @@ const Write = () => {
           />
         </div>
 
-        {/* Content Editor */}
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium">Content</label>
           <Editor
@@ -175,13 +182,12 @@ const Write = () => {
 
         <button
           type="submit"
-          className="bg-blue-500 hover:bg-blue-600 text-white rounded-md h-10 transition"
+          className="bg-blue-500 hover:bg-blue-600 text-white rounded-md h-10 transition cursor-pointer"
         >
           Submit Blog
         </button>
       </form>
 
-      {/* Image Preview Modal */}
       {showPreview && image && (
         <div
           className="fixed inset-0 bg-zinc-500 bg-opacity-70 flex justify-center items-center z-50"
@@ -189,7 +195,6 @@ const Write = () => {
         >
           <img
             src={URL.createObjectURL(image)}
-            alt="Preview"
             className="max-w-[90vw] max-h-[90vh] rounded-lg object-contain"
           />
           <div

@@ -52,12 +52,12 @@ const AllBlogs = () => {
                 {blog.title}
               </h2>
 
-              {/* Render HTML content without stripping tags */}
+             
               <div
                 className="prose max-w-none text-zinc-700 overflow-hidden"
                 style={{
                   display: "-webkit-box",
-                  WebkitLineClamp: 5, // show 5 lines max
+                  WebkitLineClamp: 5, 
                   WebkitBoxOrient: "vertical",
                 }}
                 dangerouslySetInnerHTML={{ __html: blog.content }}
@@ -65,7 +65,7 @@ const AllBlogs = () => {
 
               <button
                 onClick={() => navigate(`/allblogs/${blog._id}`)}
-                className="text-blue-600 font-semibold mt-2"
+                className="text-blue-600 font-semibold mt-2 cursor-pointer"
               >
                 Read More →
               </button>

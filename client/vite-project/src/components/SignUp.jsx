@@ -11,6 +11,7 @@ const SignUp = () => {
   const [step, setStep] = useState(1);
   const [timer, setTimer] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [loadingVerify, setLoadingVerify] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -26,25 +27,22 @@ const SignUp = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const changeHandler = (e) => {
-  const { name, value } = e.target;
-  const updated = { ...formData, [name]: value };
-  setFormData(updated);
-
-  
-  const error = validateField(name, value, updated);
-
-
-  let confirmError = errors.confirmPassword;
-  if (name === "password" && updated.confirmPassword) {
-    confirmError = validateField("confirmPassword", updated.confirmPassword, updated);
-  }
-
-  setErrors((prev) => ({
-    ...prev,
-    [name]: error,
-    ...(name === "password" ? { confirmPassword: confirmError } : {}),
-  }));
-};
+    const { name, value } = e.target;
+    let finalValue = value;
+    if (name === "otp") finalValue = value.replace(/\D/g, "").slice(0, 6);
+    const updated = { ...formData, [name]: finalValue };
+    setFormData(updated);
+    const error = validateField(name, finalValue, updated);
+    let confirmError = errors.confirmPassword;
+    if (name === "password" && updated.confirmPassword) {
+      confirmError = validateField("confirmPassword", updated.confirmPassword, updated);
+    }
+    setErrors((prev) => ({
+      ...prev,
+      [name]: error,
+      ...(name === "password" ? { confirmPassword: confirmError } : {}),
+    }));
+  };
 
   const blurHandler = (e) => {
     const { name, value } = e.target;
@@ -60,31 +58,25 @@ const SignUp = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-
     const validationErrors = validateForm(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-
     setFormError("");
     setLoading(true);
-
     try {
       const response = await fetch("http://localhost:4000/api/v1/register-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         setFormError(data.msg || "Failed to send OTP");
         setLoading(false);
         return;
       }
-
       toast.success(data.msg);
       setStep(2);
       setTimer(900);
@@ -96,6 +88,7 @@ const SignUp = () => {
   };
 
   const verifyOtpHandler = async () => {
+    setLoadingVerify(true);
     try {
       const response = await fetch("http://localhost:4000/api/v1/verify-register", {
         method: "POST",
@@ -105,18 +98,17 @@ const SignUp = () => {
           otp: formData.otp,
         }),
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         toast.error(data.msg);
         return;
       }
-
       toast.success("Account created successfully");
       navigate("/login");
     } catch {
       toast.error("Verification failed");
+    } finally {
+      setLoadingVerify(false);
     }
   };
 
@@ -141,7 +133,7 @@ const SignUp = () => {
 
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Email</label>
-              <input name="email" value={formData.email} onChange={changeHandler} onBlur={blurHandler} placeholder="Enter your email" className="shadow-sm shadow-zinc-300 px-4 py-2 rounded-md outline-none focus:ring-2 focus:ring-blue-400" maxLength={50}/>
+              <input name="email" value={formData.email} onChange={changeHandler} onBlur={blurHandler} placeholder="Enter your email" className="shadow-sm shadow-zinc-300 px-4 py-2 rounded-md outline-none focus:ring-2 focus:ring-blue-400" maxLength={50} />
               {errors.email && <p className="text-red-600 text-xs">{errors.email}</p>}
             </div>
 
@@ -151,14 +143,14 @@ const SignUp = () => {
                 <div className="absolute right-3 top-0 group cursor-pointer">
                   <IoAlertCircleOutline className="text-gray-400 text-lg" />
                   <div className="absolute hidden group-hover:block right-0 -top-20 w-64 bg-black text-white text-xs rounded-md p-2 shadow-lg z-10">
-                    Must include uppercase, number, special character <br />
+                    Must include uppercase, lowercase, number, special character <br />
                     Password must be at least 8 characters
                   </div>
                 </div>
               </label>
 
               <div className="relative">
-                <input name="password" type={showPassword ? "text" : "password"} placeholder="Enter password" value={formData.password} onChange={changeHandler} onBlur={blurHandler} className="shadow-sm shadow-zinc-300 px-4 py-2 pr-10 rounded-md w-full outline-none focus:ring-2 focus:ring-blue-400" maxLength={20}/>
+                <input name="password" type={showPassword ? "text" : "password"} placeholder="Enter password" value={formData.password} onChange={changeHandler} onBlur={blurHandler} className="shadow-sm shadow-zinc-300 px-4 py-2 pr-10 rounded-md w-full outline-none focus:ring-2 focus:ring-blue-400" maxLength={20} />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer" onClick={() => setShowPassword(!showPassword)}>
                   {showPassword ? <AiOutlineEyeInvisible className="text-gray-500 text-lg" /> : <AiOutlineEye className="text-gray-500 text-lg" />}
                 </div>
@@ -179,13 +171,12 @@ const SignUp = () => {
 
             {formError && <p className="text-red-600 text-sm text-center">{formError}</p>}
 
-            <button
-              disabled={loading}
-              className="bg-blue-500 hover:bg-blue-600 text-white rounded-md h-10 mt-2 transition cursor-pointer flex justify-center items-center"
-            >
+            <button disabled={loading} className="bg-blue-500 hover:bg-blue-600 text-white rounded-md h-10 mt-2 transition cursor-pointer flex justify-center items-center cursor-pointer">
               {loading ? (
-                <div className="flex gap-1 items-center justify-center"><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-white">loading...</p></div>
+                <div className="flex gap-1 items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-white">loading...</p>
+                </div>
               ) : (
                 "Register"
               )}
@@ -197,29 +188,34 @@ const SignUp = () => {
           <>
             <input
               name="otp"
+              value={formData.otp}
               placeholder="Enter OTP"
+              inputMode="numeric"
+              maxLength={6}
               onChange={changeHandler}
               className="shadow-sm shadow-zinc-300 px-4 py-2 rounded-md outline-none focus:ring-2 focus:ring-green-400"
             />
 
-            <p className="text-sm text-gray-500 text-center">
-              OTP expires in: {formatTime()}
-            </p>
+            <p className="text-sm text-gray-500 text-center">OTP expires in: {formatTime()}</p>
 
             <button
               type="button"
+              disabled={loadingVerify}
               onClick={verifyOtpHandler}
-              className="bg-green-500 hover:bg-green-600 text-white rounded-md h-10 mt-2 transition"
+              className="bg-green-500 hover:bg-green-600 text-white rounded-md h-10 mt-2 transition flex justify-center items-center cursor-pointer"
             >
-              Verify OTP
+              {loadingVerify ? (
+                <div className="flex gap-1 items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-white">loading...</p>
+                </div>
+              ) : (
+                "Verify OTP"
+              )}
             </button>
 
             {timer === 0 && (
-              <button
-                type="button"
-                onClick={submitHandler}
-                className="text-blue-500 underline text-sm"
-              >
+              <button type="button" onClick={submitHandler} className="text-blue-500 underline text-sm cursor-pointer">
                 Resend OTP
               </button>
             )}

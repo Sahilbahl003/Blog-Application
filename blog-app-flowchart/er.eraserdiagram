@@ -5,30 +5,44 @@ user [icon:user,color:green]{
     name string
     email string
     password string
-    confirmPassword string
-    profilePicture string
+    role string
+    profileImage string
     createdAt timestamp
+    otp string
+    otpExpire Date
+    isOtpVerified boolean
+    isEmailVerified boolean
+    otpLastSentAt Date
 }
 
 blog [icon:pencil]{
     _id string
     title string 
     content string
-    picture string
-    authorId string 
+    image string
+    email string
+    author objectId 
     createdAt timestamp
 }
 
 comment [icon:chat, color:blue]{
     _id string
-    userId string
-    postId string
+    user objectId
+    blog objectId
     text string
     createdAt timestamp 
 
 }
 
+// Otp [icon:timer, color:pink]{
+//     _id string
+//     email string
+//     otp string
+//     userData Object
+//     createdAt Date
+// }
 
-blog.authorId > user._id
-comment.userId > user._id
-comment.blogId > blog._id
+
+blog.author > user._id
+comment.user > user._id
+comment.blog > blog._id

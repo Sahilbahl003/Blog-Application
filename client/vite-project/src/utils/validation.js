@@ -59,6 +59,11 @@ export const validateField = (name, value, formData = {}) => {
   return message;
 };
 
+if (name === "otp") {
+  if (!value) message = "OTP is required";
+  else if (!/^\d{6}$/.test(value)) message = "OTP must be 6 digits";
+}
+
 export const validateForm = (formData) => {
   const errors = {};
   Object.keys(formData).forEach((key) => {
@@ -67,3 +72,4 @@ export const validateForm = (formData) => {
   });
   return errors;
 };
+

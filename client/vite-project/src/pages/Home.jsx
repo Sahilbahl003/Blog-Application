@@ -19,7 +19,6 @@ const Home = () => {
     }
   };
 
-  // Only truncate titles, not HTML content
   const truncateText = (text, maxLength) => {
     if (!text) return "";
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
@@ -27,13 +26,9 @@ const Home = () => {
 
   return (
     <div className="relative w-[100vw] bg-black overflow-x-hidden mt-20">
-      <img
-        src="/bg-hero.png"
-        width="100%"
-        height="100%"
-        className="z-[20]"
-      />
-      <div className="h-[100vh] w-[100vw] flex flex-col items-center justify-center text-center px-4 absolute top-[2%] left-[0%]">
+      <img src="/bg-hero.png" className="z-[20] w-full h-[900px]" />
+
+      <div className="h-[100vh] w-[100vw] flex flex-col items-center justify-center text-center px-4 absolute mt-[100px] top-[2%] left-[0%]">
         <h1 className="text-4xl md:text-5xl font-bold text-[#0A2440]">
           Create & Share Your Ideas
         </h1>
@@ -46,15 +41,15 @@ const Home = () => {
           to="/allblogs"
           className="bg-[#0A2440] text-2xl text-white px-8 py-3 rounded-lg hover:bg-[#27578a] transition mt-[50px]"
         >
-          View All Blogs<span className="ml-2 w-[30px]">→</span>
+          View All Blogs →
         </Link>
 
-        <div className="max-w-5xl mx-auto py-16 px-4">
-          <h2 className="text-2xl font-semibold mb-4 text-center text-[#0A2440]">
+        <div className="max-w-6xl mx-auto py-16 px-4">
+          <h2 className="text-2xl font-semibold mb-8 text-center text-[#0A2440]">
             Latest Blogs
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-8">
             {blogs.length === 0 ? (
               <p className="col-span-3 text-center text-gray-600">
                 No blogs available.
@@ -63,31 +58,40 @@ const Home = () => {
               blogs.map((blog) => (
                 <div
                   key={blog._id}
-                  className="bg-[#4f7eb0] hover:bg-[#6ca8e8] cursor-pointer text-white hover:text-[#0A2440] shadow rounded-lg p-4 hover:scale-105 hover:shadow-md hover:shadow-zinc-400 hover:transition-all hover:duration-300"
                   onClick={() => navigate(`/allblogs/${blog._id}`)}
+                  className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group"
                 >
-                  {/* Title with limit and ellipsis */}
-                  <h3
-                    className="text-lg font-semibold mb-2 break-words [overflow-wrap:anywhere] truncate"
-                    style={{ maxWidth: "100%" }}
-                    title={blog.title} // Tooltip on hover
-                  >
-                    {truncateText(blog.title, 50)}
-                  </h3>
+                  
+                  <div className="h-44 w-full overflow-hidden">
+                    <img
+                      src={blog.image || "/default-blog.jpg"}
+                      alt="blog"
+                      className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                    />
+                  </div>
 
-                  {/* Render HTML content preview */}
-                  <div
-                    className="text-sm mb-4 break-words [overflow-wrap:anywhere] prose max-w-none text-white overflow-hidden"
-                    style={{
-                      display: "-webkit-box",
-                      WebkitLineClamp: 5, // limit to 5 lines
-                      WebkitBoxOrient: "vertical",
-                    }}
-                    dangerouslySetInnerHTML={{ __html: blog.content }}
-                  />
+                 
+                  <div className="p-5 text-left">
+                    <h3
+                      className="text-lg font-semibold text-[#0A2440] mb-2 break-words"
+                      title={blog.title}
+                    >
+                      {truncateText(blog.title, 55)}
+                    </h3>
 
-                  <div className="text-white hover:underline text-sm">
-                    Read More →
+                    <div
+                      className="text-sm text-gray-600 mb-4 overflow-hidden"
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 4,
+                        WebkitBoxOrient: "vertical",
+                      }}
+                      dangerouslySetInnerHTML={{ __html: blog.content }}
+                    />
+
+                    <div className="text-[#0A2440] font-medium group-hover:underline">
+                      Read More →
+                    </div>
                   </div>
                 </div>
               ))

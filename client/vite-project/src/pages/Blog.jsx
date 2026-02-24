@@ -4,6 +4,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import Comments from "../components/Comments";
 import { toast } from "react-toastify";
 import { FiLink2 } from "react-icons/fi";
+import DeleteBlogModal from "../components/DeleteBlogModal";
 
 const Blog = () => {
   const { id } = useParams();
@@ -12,6 +13,7 @@ const Blog = () => {
 
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const token = localStorage.getItem("token");
   const fromMyBlogs = location.state?.fromMyBlogs;
@@ -35,18 +37,21 @@ const Blog = () => {
     }
   };
 
-  const deleteBlog = async () => {
-    const confirmDelete = window.confirm("Delete this blog?");
-    if (!confirmDelete) return;
+  const confirmDelete = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:4000/api/v1/deleteblog/${id}`,
+        { method: "DELETE", headers: { token } }
+      );
 
-    const res = await fetch(
-      `http://localhost:4000/api/v1/deleteblog/${id}`,
-      { method: "DELETE", headers: { token } }
-    );
+      const data = await res.json();
+      toast.success(data.message || "Blog deleted");
+      navigate("/myblogs");
+    } catch {
+      toast.error("Failed to delete blog");
+    }
 
-    const data = await res.json();
-    toast.success(data.message || "Blog deleted");
-    navigate("/myblogs");
+    setShowDeleteModal(false);
   };
 
   const copyCurrentUrl = async () => {
@@ -66,7 +71,6 @@ const Blog = () => {
         </div>
       ) : blog ? (
         <div className="w-full max-w-5xl mt-6 shadow-md shadow-zinc-400 p-6 rounded-lg bg-white">
-          {/* Blog image */}
           {blog.image && (
             <img
               src={blog.image}
@@ -75,16 +79,20 @@ const Blog = () => {
             />
           )}
 
-          {/* Author + Date + Buttons + Share */}
           <div className="flex justify-between items-start mb-4">
             <div className="flex flex-col">
               <div className="flex items-center gap-3">
                 <img
-                  src={blog.author?.profileImage || "https://i.ibb.co/4pDNDk1/avatar.png"}
+                  src={
+                    blog.author?.profileImage ||
+                    "https://i.ibb.co/4pDNDk1/avatar.png"
+                  }
                   alt={blog.author?.name || "Author"}
                   className="w-10 h-10 rounded-full object-cover shadow-sm"
                 />
-                <p className="text-lg font-semibold">By {blog.author?.name || "Unknown"}</p>
+                <p className="text-lg font-semibold">
+                  By {blog.author?.name || "Unknown"}
+                </p>
               </div>
               {blog.createdAt && (
                 <p className="text-zinc-600 text-sm mt-1">
@@ -98,14 +106,14 @@ const Blog = () => {
                 <>
                   <button
                     onClick={() => navigate(`/editblog/${blog._id}`)}
-                    className="bg-green-500 text-white px-4 py-1 rounded"
+                    className="bg-green-500 text-white px-4 py-1 rounded cursor-pointer"
                   >
                     Edit
                   </button>
 
                   <button
-                    onClick={deleteBlog}
-                    className="bg-red-500 text-white px-4 py-1 rounded"
+                    onClick={() => setShowDeleteModal(true)}
+                    className="bg-red-500 text-white px-4 py-1 rounded cursor-pointer"
                   >
                     Delete
                   </button>
@@ -121,21 +129,28 @@ const Blog = () => {
             </div>
           </div>
 
-          {/* Title */}
-          <h1 className="text-3xl font-bold break-all mb-4">{blog.title}</h1>
+          <h1 className="text-3xl font-bold break-all mb-4">
+            {blog.title}
+          </h1>
 
-<div
-  className="prose prose-lg max-w-none break-words [overflow-wrap:anywhere] whitespace-pre-wrap"
-  dangerouslySetInnerHTML={{ __html: blog.content }}
-></div>
+          <div
+            className="prose prose-lg max-w-none break-words [overflow-wrap:anywhere] whitespace-pre-wrap"
+            dangerouslySetInnerHTML={{ __html: blog.content }}
+          ></div>
 
-          {/* Comments Section */}
           <div className="mt-8 p-6 bg-gray-50 border border-gray-300 rounded-lg">
             <Comments blogId={id} />
           </div>
         </div>
       ) : (
         <p className="text-lg text-red-500 mt-10">Blog not found</p>
+      )}
+
+      {showDeleteModal && (
+        <DeleteBlogModal
+          onCancel={() => setShowDeleteModal(false)}
+          onConfirm={confirmDelete}
+        />
       )}
     </div>
   );

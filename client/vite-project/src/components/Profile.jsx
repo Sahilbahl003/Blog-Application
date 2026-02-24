@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { RxCross1 } from "react-icons/rx";
 import LogoutModal from "./logoutModal";
+import RemoveImageModal from "./removeImageModal";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [errors, setErrors] = useState({});
 
   const profilePlaceholder = "https://placehold.co/200x200?text=Profile";
@@ -53,7 +55,7 @@ const Profile = () => {
       toast.success("Profile updated");
       setUser(data.user);
       localStorage.setItem("user", JSON.stringify(data.user));
-    } catch (error) {
+    } catch {
       toast.error("Something went wrong");
     }
 
@@ -63,9 +65,34 @@ const Profile = () => {
   const confirmLogout = () => {
     localStorage.clear();
     toast.success("Logged out successfully");
-    setTimeout(() => {
-      navigate("/login");
-    }, 1000);
+    setTimeout(() => navigate("/login"), 1000);
+  };
+
+ 
+  const confirmRemoveImage = async () => {
+    try {
+      const res = await fetch("http://localhost:4000/api/v1/removeProfileImage", {
+        method: "PUT",
+        headers: { token },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Failed to remove image");
+        return;
+      }
+
+      setImage(null);
+      setUser(data.user);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      toast.success("Profile image removed");
+    } catch {
+      toast.error("Something went wrong");
+    }
+
+    setShowRemoveModal(false);
   };
 
   const handleImageChange = (file) => {
@@ -73,7 +100,10 @@ const Profile = () => {
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
 
     if (!allowedTypes.includes(file.type)) {
-      setErrors((prev) => ({ ...prev, image: "Only JPG, JPEG and PNG formats are allowed" }));
+      setErrors((prev) => ({
+        ...prev,
+        image: "Only JPG, JPEG and PNG formats are allowed",
+      }));
       setImage(null);
       return;
     }
@@ -82,19 +112,20 @@ const Profile = () => {
     setImage(file);
   };
 
-  const handleRemoveImage = () => {
-    setImage(null);
-    setErrors((prev) => ({ ...prev, image: "" }));
-  };
-
   return (
     <div className="w-screen min-h-screen flex justify-center items-center bg-gray-50">
       <div className="bg-white shadow-xl px-8 py-6 w-[420px] rounded-xl flex flex-col gap-5">
-        <h2 className="text-2xl font-bold text-center text-blue-500">Your Profile</h2>
+        <h2 className="text-2xl font-bold text-center text-blue-500">
+          Your Profile
+        </h2>
 
         <div className="flex flex-col items-center gap-3">
           <img
-            src={image ? URL.createObjectURL(image) : user?.profileImage || profilePlaceholder}
+            src={
+              image
+                ? URL.createObjectURL(image)
+                : user?.profileImage || profilePlaceholder
+            }
             className="w-24 h-24 rounded-full object-cover shadow-md cursor-pointer hover:scale-105 transition"
             onClick={() => setShowPreview(true)}
           />
@@ -110,33 +141,33 @@ const Profile = () => {
               />
             </label>
 
-            {image && (
-              <button
-                type="button"
-                onClick={handleRemoveImage}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition text-sm"
-              >
-                Remove
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => setShowRemoveModal(true)}
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition text-sm cursor-pointer"
+            >
+              Remove
+            </button>
           </div>
 
-          {errors.image && <p className="text-red-600 text-xs">{errors.image}</p>}
+          {errors.image && (
+            <p className="text-red-600 text-xs">{errors.image}</p>
+          )}
         </div>
 
-        <div className="flex flex-col gap-1">
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="shadow-sm px-4 py-2 rounded-md outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="shadow-sm px-4 py-2 rounded-md outline-none focus:ring-2 focus:ring-blue-400"
+        />
 
         <button
           onClick={updateProfile}
           disabled={loading}
           className={`${
-            loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+            loading
+              ? "bg-blue-400 cursor-not-allowed"
+              : "bg-blue-500 hover:bg-blue-600"
           } text-white rounded-md h-10 transition flex justify-center items-center gap-2`}
         >
           {loading && (
@@ -147,14 +178,14 @@ const Profile = () => {
 
         <button
           onClick={() => navigate("/change-password")}
-          className="border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white rounded-md h-10 transition"
+          className="border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white rounded-md h-10 transition cursor-pointer"
         >
           Change Password
         </button>
 
         <button
           onClick={() => setShowLogoutModal(true)}
-          className="border border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-md h-10 transition"
+          className="border border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-md h-10 transition cursor-pointer"
         >
           Logout
         </button>
@@ -162,25 +193,35 @@ const Profile = () => {
 
       {showPreview && (
         <div
-          className="fixed inset-0 bg-zinc-500 bg-opacity-70 flex justify-center items-center z-50"
+          className="fixed inset-0 bg-zinc-500 bg-opacity-70 flex justify-center items-center z-50 cursor-pointer"
           onClick={() => setShowPreview(false)}
         >
           <img
-            src={image ? URL.createObjectURL(image) : user?.profileImage || profilePlaceholder}
-            alt="Preview"
+            src={
+              image
+                ? URL.createObjectURL(image)
+                : user?.profileImage || profilePlaceholder
+            }
             className="max-w-[90vw] max-h-[90vh] rounded-lg object-contain"
           />
-          <div
-            className="absolute top-5 right-5 text-white cursor-pointer"
-            onClick={() => setShowPreview(false)}
-          >
+          <div className="absolute top-5 right-5 text-white cursor-pointer">
             <RxCross1 className="w-6 h-6" />
           </div>
         </div>
       )}
 
       {showLogoutModal && (
-        <LogoutModal onCancel={() => setShowLogoutModal(false)} onConfirm={confirmLogout} />
+        <LogoutModal
+          onCancel={() => setShowLogoutModal(false)}
+          onConfirm={confirmLogout}
+        />
+      )}
+
+      {showRemoveModal && (
+        <RemoveImageModal
+          onCancel={() => setShowRemoveModal(false)}
+          onConfirm={confirmRemoveImage}
+        />
       )}
     </div>
   );
